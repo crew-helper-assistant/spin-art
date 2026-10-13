@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#202325">
+<title>轉盤畫室</title>
+<style>
+:root{color-scheme:dark;--bg:#202325;--panel:#2b2f31;--ink:#f8f6f2;--muted:#aeb5b5;--accent:#a8ccbe}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overscroll-behavior:none}body{font-family:system-ui,-apple-system,"Noto Sans TC",sans-serif;background:var(--bg);color:var(--ink);overflow:hidden;-webkit-user-select:none;user-select:none}
+button,input{font:inherit}button{cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.app{height:100%;height:100dvh;max-width:1180px;margin:auto;padding:24px 28px;display:flex;flex-direction:column;gap:16px;padding-top:max(18px,env(safe-area-inset-top));padding-bottom:max(18px,env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:center;gap:16px}h1{font-size:26px;letter-spacing:.12em;font-weight:500;margin:0}header p{margin:6px 0 0;font-size:13px;color:var(--muted);line-height:1.6}.badge{font-size:12px;color:var(--accent);white-space:nowrap;display:flex;align-items:center;gap:7px}.badge:before{content:"";width:6px;height:6px;background:var(--accent);border-radius:50%}
+.workspace{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:34px;min-height:0;flex:1;align-items:center}.stage{overflow:hidden;min-height:0;width:100%;height:100%;display:flex;justify-content:center;align-items:center;position:relative;touch-action:none}.wheel{width:100%;max-width:690px;aspect-ratio:1;position:relative;filter:drop-shadow(0 14px 22px #0006)}canvas{display:block;width:100%;height:100%;border-radius:50%;background:white;box-shadow:0 0 0 2px #d3d4d1,0 0 0 9px #424749;touch-action:none;cursor:crosshair}.rotation-ring{position:absolute;inset:-6px;pointer-events:none;border-radius:50%;border:1px solid #626966}.rotation-ring:before{content:"";position:absolute;top:-2px;left:calc(50% - 3px);height:5px;width:6px;background:var(--accent);border-radius:2px}.cursor{display:none;position:absolute;pointer-events:none;transform:translate(-50%,-50%);border-radius:50%;border:1px solid #24262899;box-shadow:0 0 0 1px #ffffffaa;z-index:2}
+.controls{background:var(--panel);padding:24px;border-radius:16px;display:flex;flex-direction:column;gap:22px}.control-label{font-size:13px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.control-label output{color:var(--ink);font-variant-numeric:tabular-nums;font-size:13px}.swatches{display:flex;gap:4px;justify-content:space-between}.swatch{width:36px;height:44px;border:0;background:none;display:flex;align-items:center;justify-content:center;padding:0;border-radius:6px}.swatch span{width:23px;height:23px;border-radius:50%;background:var(--color);box-shadow:0 0 0 1px #ffffff20}.swatch[aria-pressed="true"] span{outline:2px solid var(--ink);outline-offset:3px}.custom{width:36px;height:44px;position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer}.custom:before{content:"＋";width:25px;height:25px;border:1px solid #879291;border-radius:50%;text-align:center;line-height:22px;color:var(--ink);font-size:18px}.custom input{position:absolute;width:100%;height:100%;opacity:0;cursor:pointer}.custom.selected:before{outline:2px solid var(--ink);outline-offset:3px;background:var(--custom);color:white}
+input[type=range]{display:block;width:100%;height:28px;margin:0;accent-color:var(--accent);cursor:pointer;touch-action:pan-x}.direction{display:flex;gap:6px;margin-top:8px}.direction button{flex:1;height:44px;background:#353b3d;border:1px solid transparent;color:var(--muted);border-radius:6px;font-size:13px}.direction button[aria-pressed="true"]{color:var(--accent);border-color:#7d9c91;background:#303e39}
+.actions{display:flex;gap:8px}.actions button{min-height:44px;border:1px solid #5b6365;border-radius:6px;background:none;color:var(--ink);font-size:13px;flex:1}.actions .primary{background:var(--accent);color:#20362d;border-color:var(--accent);font-weight:600}.hint{font-size:12px;line-height:1.7;margin:0;color:var(--muted)}footer{font-size:11px;color:#889292;display:flex;justify-content:space-between;gap:12px;line-height:1.5}#status{color:var(--accent)}
+@media(max-width:720px){.app{padding-left:14px;padding-right:14px;gap:12px}h1{font-size:22px}header p{font-size:12px}.badge{font-size:11px}.workspace{display:flex;flex-direction:column;gap:18px;align-items:stretch}.stage{flex:1;min-height:100px}.wheel{width:auto;height:100%;max-height:calc(100vw - 54px);max-width:calc(100vw - 54px)}.controls{padding:12px;gap:10px;border-radius:14px;flex-shrink:0;display:grid;grid-template-columns:1fr 1fr;column-gap:18px}.colors,.actions,.hint{grid-column:1/-1}.colors{display:block}.colors .control-label{margin:0;white-space:nowrap}.swatches{width:100%;max-width:360px;margin:auto;gap:0}.swatch,.custom{width:44px;flex-shrink:0}.control-label{margin-bottom:1px;font-size:12px}.control-label output{font-size:12px}.direction{gap:4px;margin-top:2px}.direction button{font-size:12px}.hint{font-size:11px;line-height:1.5}.actions button{min-height:44px}footer{font-size:10px}}
+@media(max-height:650px) and (max-width:720px){.app{gap:8px;padding-top:10px;padding-bottom:8px}header p{display:none}.controls{padding:10px 12px;gap:4px}.hint{display:none}.workspace{gap:14px}.stage{min-height:65px}footer{display:none}}
+@media(max-height:500px) and (min-width:550px){.app{padding:12px 20px;gap:8px}header p,footer,.hint{display:none}.workspace{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:26px}.stage{height:100%}.wheel{width:auto;height:100%;max-width:100%;max-height:calc(100dvh - 90px)}.controls{display:flex;padding:12px 16px;gap:6px}.colors{display:block}.colors .control-label{margin-bottom:0}.swatches{margin:0}.direction button{height:38px}.actions button{min-height:40px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div><h1>轉盤畫室</h1><p>手指停住，讓旋轉的紙盤替你畫出弧線。</p></div><span class="badge" id="spin-state">旋轉中</span></header>
+<div class="workspace">
+<section class="stage" aria-label="旋轉畫布"><div class="wheel" id="wheel"><canvas id="view" width="1400" height="1400" aria-label="按住並移動手指或滑鼠，在轉盤上作畫">你的瀏覽器不支援畫布。</canvas><div class="rotation-ring" id="ring"></div><div class="cursor" id="cursor"></div></div></section>
+<section class="controls" aria-label="畫筆與轉盤設定">
+<div class="colors"><div class="control-label">畫筆顏色</div><div class="swatches" role="group" aria-label="畫筆顏色">
+<button class="swatch" data-color="#db343c" aria-label="朱紅" aria-pressed="true" style="--color:#db343c"><span></span></button>
+<button class="swatch" data-color="#245ea6" aria-label="靛藍" aria-pressed="false" style="--color:#245ea6"><span></span></button>
+<button class="swatch" data-color="#3d8b70" aria-label="墨綠" aria-pressed="false" style="--color:#3d8b70"><span></span></button>
+<button class="swatch" data-color="#e9ac38" aria-label="金黃" aria-pressed="false" style="--color:#e9ac38"><span></span></button>
+<button class="swatch" data-color="#332d35" aria-label="墨黑" aria-pressed="false" style="--color:#332d35"><span></span></button>
+<label class="custom" id="custom-label" title="自訂顏色"><input id="color" type="color" value="#db343c" aria-label="自訂畫筆顏色"></label>
+</div></div>
+<div><label class="control-label" for="speed">轉盤速度<output id="speed-value" for="speed">180°/秒</output></label><input id="speed" type="range" min="0" max="600" step="5" value="180"><div class="direction" role="group" aria-label="旋轉方向"><button id="cw" aria-pressed="true">↻ 順時針</button><button id="ccw" aria-pressed="false">↺ 逆時針</button></div></div>
+<div><label class="control-label" for="size">畫筆粗細<output id="size-value" for="size">18 px</output></label><input id="size" type="range" min="4" max="70" step="1" value="18"><p class="hint" style="margin-top:8px">按住不動會畫出圓弧；<br>慢慢往中心移動，試試螺旋。</p></div>
+<div class="actions"><button id="clear">清空畫布</button><button id="save" class="primary">下載 PNG</button></div>
+<p class="hint">作品只留在這個頁面，離開前記得下載。</p>
+</section></div>
+<footer><span>筆尖不轉，畫布在轉。</span><span id="status" role="status" aria-live="polite">可離線使用</span></footer>
+</main>
+<script>
+'use strict';
+(() => {
+  const N = 1400, C = N / 2, TAU = Math.PI * 2;
+  const view = document.getElementById('view'), ctx = view.getContext('2d');
+  // Permanent paint lives in disc coordinates. It is never resampled or rotated.
+  const disc = document.createElement('canvas'); disc.width = disc.height = N;
+  const paint = disc.getContext('2d');
+  const speed = document.getElementById('speed'), size = document.getElementById('size');
+  const ring = document.getElementById('ring'), cursor = document.getElementById('cursor');
+  let color = '#db343c', direction = 1, angle = 0, lastTime = performance.now();
+  let activeId = null, pen = null, previous = null;
+  let statusTimer;
+  function status(text) {
+    clearTimeout(statusTimer); document.getElementById('status').textContent = text;
+    statusTimer = setTimeout(() => {document.getElementById('status').textContent='可離線使用';}, 3500);
+  }
+  function blank() {
+    paint.clearRect(0,0,N,N); paint.save();
+    paint.beginPath(); paint.arc(C,C,C,0,TAU); paint.clip();
+    paint.fillStyle = '#ffffff'; paint.fillRect(0,0,N,N); paint.restore(); previous = null;
+  }
+  function discPoint(p,a) {
+    const x=p.x-C,y=p.y-C,cos=Math.cos(a),sin=Math.sin(a);
+    return {x:C+x*cos+y*sin,y:C-x*sin+y*cos};
+  }
+  function stamp(p,a) {
+    const d=discPoint(p,a); paint.beginPath(); paint.arc(d.x,d.y,Number(size.value)/2,0,TAU); paint.fill();
+  }
+  function render() {
+    ctx.clearRect(0,0,N,N); ctx.save(); ctx.translate(C,C); ctx.rotate(angle);
+    ctx.drawImage(disc,-C,-C); ctx.restore();
+    ring.style.transform=`rotate(${angle}rad)`;
+  }
+  function advance(now) {
+    // Ignore long background-tab gaps rather than inventing paint while away.
+    const dt=Math.max(0,Math.min((now-lastTime)/1000,0.08)); lastTime=now;
+    const delta=direction*Number(speed.value)*Math.PI/180*dt;
+    const nextAngle=angle+delta;
+    if (pen) {
+      const from=previous || {p:pen,a:angle};
+      const radius=Math.max(Math.hypot(from.p.x-C,from.p.y-C),Math.hypot(pen.x-C,pen.y-C));
+      const length=Math.hypot(pen.x-from.p.x,pen.y-from.p.y)+Math.abs(nextAngle-from.a)*radius;
+      // Subdivide rotation itself, not only a chord between two disc-space points.
+      const steps=Math.max(1,Math.ceil(length/Math.max(1,Number(size.value)*0.22)));
+      paint.save(); paint.beginPath(); paint.arc(C,C,C,0,TAU); paint.clip(); paint.fillStyle=color;
+      for(let i=1;i<=steps;i++) {
+        const t=i/steps;
+        stamp({x:from.p.x+(pen.x-from.p.x)*t,y:from.p.y+(pen.y-from.p.y)*t},from.a+(nextAngle-from.a)*t);
+      }
+      paint.restore(); previous={p:{...pen},a:nextAngle};
+    } else previous=null;
+    angle=nextAngle;
+    // Keep numbers small, preserving the previous sample's relative angle.
+    if(Math.abs(angle)>TAU) {const shift=Math.trunc(angle/TAU)*TAU;angle-=shift;if(previous)previous.a-=shift;}
+    render();
+  }
+  function frame(now) {advance(now);requestAnimationFrame(frame);}
+  function position(e) {
+    const r=view.getBoundingClientRect();
+    return {x:(e.clientX-r.left)*N/r.width,y:(e.clientY-r.top)*N/r.height};
+  }
+  function showCursor(e) {
+    const r=view.getBoundingClientRect(); cursor.style.width=cursor.style.height=`${Number(size.value)*r.width/N}px`;
+    cursor.style.left=`${e.clientX-r.left}px`;cursor.style.top=`${e.clientY-r.top}px`;
+    cursor.style.display=e.pointerType==='mouse'?'block':'none';
+  }
+  view.addEventListener('pointerdown',e=>{
+    if(activeId!==null || (e.pointerType==='mouse' && e.button!==0))return;
+    e.preventDefault(); const p=position(e);
+    if(Math.hypot(p.x-C,p.y-C)>C)return;
+    advance(performance.now()); activeId=e.pointerId;pen=p;previous=null;
+    view.setPointerCapture(e.pointerId);showCursor(e);advance(performance.now());
+  },{passive:false});
+  view.addEventListener('pointermove',e=>{
+    showCursor(e);if(e.pointerId!==activeId)return;e.preventDefault();
+    pen=position(e);advance(performance.now());
+  },{passive:false});
+  function end(e) {
+    if(e.pointerId!==activeId)return;e.preventDefault();advance(performance.now());
+    pen=null;previous=null;activeId=null;cursor.style.display='none';
+    if(view.hasPointerCapture(e.pointerId))view.releasePointerCapture(e.pointerId);
+  }
+  view.addEventListener('pointerup',end,{passive:false});view.addEventListener('pointercancel',end,{passive:false});
+  view.addEventListener('lostpointercapture',()=>{pen=null;previous=null;activeId=null;});
+  view.addEventListener('pointerleave',()=>{if(activeId===null)cursor.style.display='none';});
+  view.addEventListener('contextmenu',e=>e.preventDefault());
+  view.addEventListener('touchstart',e=>e.preventDefault(),{passive:false});
+  view.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+  window.addEventListener('blur',()=>{pen=null;previous=null;activeId=null;});
+  document.addEventListener('visibilitychange',()=>{lastTime=performance.now();pen=null;previous=null;activeId=null;});
+  function choose(value,custom=false) {
+    color=value;document.getElementById('color').value=value;
+    document.querySelectorAll('.swatch').forEach(b=>b.setAttribute('aria-pressed',String(!custom&&b.dataset.color===value)));
+    document.getElementById('custom-label').classList.toggle('selected',custom);
+    document.getElementById('custom-label').style.setProperty('--custom',value);
+  }
+  document.querySelectorAll('.swatch').forEach(b=>b.addEventListener('click',()=>choose(b.dataset.color)));
+  document.getElementById('color').addEventListener('input',e=>choose(e.target.value,true));
+  speed.addEventListener('input',()=>{document.getElementById('speed-value').value=`${speed.value}°/秒`;document.getElementById('spin-state').textContent=Number(speed.value)?'旋轉中':'已暫停';});
+  size.addEventListener('input',()=>{document.getElementById('size-value').value=`${size.value} px`;});
+  function spin(d){advance(performance.now());direction=d;document.getElementById('cw').setAttribute('aria-pressed',String(d===1));document.getElementById('ccw').setAttribute('aria-pressed',String(d===-1));}
+  document.getElementById('cw').addEventListener('click',()=>spin(1));
+  document.getElementById('ccw').addEventListener('click',()=>spin(-1));
+  document.getElementById('clear').addEventListener('click',()=>{blank();render();status('已清空畫布');});
+  document.getElementById('save').addEventListener('click',()=>{
+    // Export the original, unrotated disc with transparent corners, at full resolution.
+    disc.toBlob(blob=>{
+      if(!blob){status('下載失敗，請再試一次');return;}
+      const url=URL.createObjectURL(blob),a=document.createElement('a');
+      a.href=url;a.download='spin-art.png';document.body.appendChild(a);a.click();a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),60000);status('已匯出 PNG');
+    },'image/png');
+  });
+  const stage=document.querySelector('.stage'),wheel=document.getElementById('wheel');
+  new ResizeObserver(()=>{
+    const diameter=Math.max(30,Math.min(stage.clientWidth-20,stage.clientHeight-20));
+    wheel.style.maxWidth=wheel.style.maxHeight='none';
+    wheel.style.width=wheel.style.height=diameter+'px';
+    cursor.style.display='none';previous=null;
+  }).observe(stage);
+  blank();render();requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
